@@ -4,7 +4,9 @@
 
 `
 pip3 install requests --user
+`
 or
+`
 pip3 install -r requirements.txt
 `
 
