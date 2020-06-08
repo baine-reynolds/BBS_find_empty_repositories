@@ -50,6 +50,15 @@ def check_if_empty(single_repo_endpoint):
     else:
         return False
 
+def check_if_fork(fork_endpoint):
+    r = session.get(fork_endpoint)
+    r_data = r.json()
+    try:
+        if r_data['origin']['slug'] != "":  # If the 'origin' block exists
+            return True
+    except KeyError:
+        return False
+
 def run():
     # Primary project/repos
     print(f"##### The following are Standard Repositories #####")
@@ -58,8 +67,15 @@ def run():
         repos_endpoint = f"{projects_endpoint}/{project['key']}/repos"
         for repo in get_repos(repos_endpoint):
             single_repo_endpoint = f"{repos_endpoint}/{repo['slug']}/branches/default"
+
+            fork_endpoint = f"{repos_endpoint}/{repo['slug']}"
+            if check_if_fork(fork_endpoint):
+                fork_status = " (Fork)"
+            else:
+                fork_status = ""
+                
             if check_if_empty(single_repo_endpoint):
-                print(f"The Repository '{project['key']}/{repo['slug']}' has an empty default branch, likely indicating that the repo itself is empty.")
+                print(f"The Repository '~{project['key']}/{repo['slug']}' has an empty default branch, likely indicating that the repo itself is empty. {fork_status}")
 
     # Personal repos
     print(f"\n##### The following are personal Repositories #####")
@@ -68,8 +84,15 @@ def run():
         repos_endpoint = f"{projects_endpoint}/~{user['slug']}/repos"
         for repo in get_repos(repos_endpoint):
             single_repo_endpoint = f"{repos_endpoint}/{repo['slug']}/branches/default"
+
+            fork_endpoint = f"{repos_endpoint}/{repo['slug']}"
+            if check_if_fork(fork_endpoint):
+                fork_status = " (Fork)"
+            else:
+                fork_status = ""
+
             if check_if_empty(single_repo_endpoint):
-                print(f"The Repository '~{project['key']}/{repo['slug']}' has an empty default branch, likely indicating that the repo itself is empty.")
+                print(f"The Repository '~{project['key']}/{repo['slug']}' has an empty default branch, likely indicating that the repo itself is empty. {fork_status}")
 
 if __name__ == '__main__':
     run()
